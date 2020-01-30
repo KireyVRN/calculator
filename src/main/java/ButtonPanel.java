@@ -220,7 +220,7 @@ class ButtonPanel extends JPanel {
     }
 
     private void initSettings() {
-        screen = new JTextField("", 10);
+        screen = new JTextField("", 17);
         screen.setFont(new Font("TimesRoman", Font.BOLD, 50));
         add(screen, BorderLayout.NORTH);
         setLayout(new GridLayout(5, 4));
