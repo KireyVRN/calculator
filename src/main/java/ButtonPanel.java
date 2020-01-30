@@ -1,19 +1,20 @@
+import javafx.stage.Screen;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.desktop.ScreenSleepEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collections;
 
 class ButtonPanel extends JPanel {
-
 
     JTextField screen;
     private static final char MINUS = '-';
     private static final char PLUS = '+';
     private static final char MLTP = '*';
     private static final char DIV = '/';
-
 
     ButtonPanel() {
         initSettings();
@@ -88,7 +89,6 @@ class ButtonPanel extends JPanel {
         jb9.addActionListener(getListener(jb9.getText()));
         jb0.addActionListener(getListener(jb0.getText()));
 
-
         jbCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -143,7 +143,6 @@ class ButtonPanel extends JPanel {
         });
 
         jbMinus.addActionListener(new ActionListener() {
-
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -211,12 +210,83 @@ class ButtonPanel extends JPanel {
         jbEQ.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String text = screen.getText();
-                if (text.contains("*")) {
 
+                ArrayList<String> list = new ArrayList<>();
+                String str = screen.getText();
+                String number = "";
+
+                for (int i = 0; i < str.length(); i++) {
+                    if (str.charAt(i) != MLTP && str.charAt(i) != MINUS && str.charAt(i) != DIV && str.charAt(i) != PLUS) {
+                        number += str.charAt(i);
+                        if (i == str.length() - 1) {
+                            list.add(number);
+                        }
+                    } else {
+                        list.add(number);
+                        number = "";
+                        list.add(str.charAt(i) + "");
+                    }
+                }
+
+                String result = recursion2(recursion1(list)).get(0);
+
+                if (result.length() >= 17) {
+                    result = result.substring(0, 17);
+                }
+
+                if (result.split("\\.")[1].equals("0")) {
+                    screen.setText(result.split("\\.")[0]);
+                } else {
+                    screen.setText(result);
                 }
             }
         });
+    }
+
+    private ArrayList<String> recursion1(ArrayList<String> list1) {
+        if (!list1.contains("*") && !list1.contains("/")) {
+            return list1;
+        } else {
+            for (int i = 0; i < list1.size(); i++) {
+                if (list1.get(i).equals("*") || list1.get(i).equals("/")) {
+                    String symb = list1.get(i);
+                    double num2 = Double.parseDouble(list1.get(i + 1));
+                    double num1 = Double.parseDouble(list1.get(i - 1));
+                    list1.remove(i + 1);
+                    list1.remove(i);
+                    if (symb.equals("/")) {
+                        list1.set(i - 1, (num1 / num2) + "");
+                    } else {
+                        list1.set(i - 1, (num1 * num2) + "");
+                    }
+                    i = 0;
+                }
+            }
+        }
+        return recursion1(list1);
+    }
+
+    private ArrayList<String> recursion2(ArrayList<String> list2) {
+        if (!list2.contains("+") && !list2.contains("-")) {
+            return list2;
+        } else {
+            for (int i = 0; i < list2.size(); i++) {
+                if (list2.get(i).equals("+") || list2.get(i).equals("-")) {
+                    String symb = list2.get(i);
+                    double num2 = Double.parseDouble(list2.get(i + 1));
+                    double num1 = Double.parseDouble(list2.get(i - 1));
+                    list2.remove(i + 1);
+                    list2.remove(i);
+                    if (symb.equals("+")) {
+                        list2.set(i - 1, (num1 + num2) + "");
+                    } else {
+                        list2.set(i - 1, (num1 - num2) + "");
+                    }
+                    i = 0;
+                }
+            }
+        }
+        return recursion2(list2);
     }
 
     private void initSettings() {
@@ -224,7 +294,6 @@ class ButtonPanel extends JPanel {
         screen.setFont(new Font("TimesRoman", Font.BOLD, 50));
         add(screen, BorderLayout.NORTH);
         setLayout(new GridLayout(5, 4));
-
     }
 
     private ActionListener getListener(String text) {
@@ -238,45 +307,5 @@ class ButtonPanel extends JPanel {
                 }
             }
         };
-    }
-
-    private void count(String text) {
-
-        String element = "";
-        ArrayList<String> list = new ArrayList<>();
-
-        for (int i = 0; i < text.length(); i++) {
-            if (text.charAt(i) != MLTP || text.charAt(i) != DIV || text.charAt(i) != MINUS || text.charAt(i) != PLUS) {
-                element += text.charAt(i);
-            } else {
-                list.add(element);
-                list.add(text.charAt(i) + "");
-                element = "";
-            }
-        }
-
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equals("*")) {
-                Double itog = Double.parseDouble(list.get(i - 1)) * Double.parseDouble(list.get(i + 1));
-                list.remove(i + 1);
-                list.remove(i);
-                list.set(i - 1, itog + "");
-            }
-            if (list.get(i).equals("/")) {
-                Double itog = Double.parseDouble(list.get(i - 1)) / Double.parseDouble(list.get(i + 1));
-                list.remove(i + 1);
-                list.remove(i);
-                list.set(i - 1, itog + "");
-            }
-        }
-    }
-
-    private ArrayList<String> recursion(ArrayList<String> list) {
-        if (list.contains("*") && list.contains("/")) {
-            return list;
-        } else {
-
-        }
-        return null;
     }
 }
