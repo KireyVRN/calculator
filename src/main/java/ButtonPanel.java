@@ -142,33 +142,48 @@ class ButtonPanel extends JPanel {
         });
 
         jbEQ.addActionListener(e -> {
-            ArrayList<String> list = new ArrayList<>();
-            String str = screen.getText();
-            String number = "";
 
-            for (int i = 0; i < str.length(); i++) {
-                if (str.charAt(i) != MLTP && str.charAt(i) != MINUS && str.charAt(i) != DIV && str.charAt(i) != PLUS) {
-                    number += str.charAt(i);
-                    if (i == str.length() - 1) {
-                        list.add(number);
+            String str = screen.getText();
+            int count = 0;
+            boolean lastSymbol = false;
+            
+            for (int a = 0; a < str.length(); a++) {
+                if (str.charAt(a) == MINUS || str.charAt(a) == PLUS || str.charAt(a) == DIV || str.charAt(a) == MLTP) {
+                    count++;
+                    if (a == str.length() - 1) {
+                        lastSymbol = true;
                     }
-                } else {
-                    list.add(number);
-                    number = "";
-                    list.add(str.charAt(i) + "");
                 }
             }
 
-            String result = recursion2(recursion1(list)).get(0);
-
-            if (result.length() >= 17) {
-                result = result.substring(0, 17);
-            }
-
-            if (result.split("\\.")[1].equals("0")) {
-                screen.setText(result.split("\\.")[0]);
+            if (count == 0 || (count == 1 && lastSymbol)) {
             } else {
-                screen.setText(result);
+                String number = "";
+                ArrayList<String> list = new ArrayList<>();
+                for (int i = 0; i < str.length(); i++) {
+                    if (str.charAt(i) != MLTP && str.charAt(i) != MINUS && str.charAt(i) != DIV && str.charAt(i) != PLUS) {
+                        number += str.charAt(i);
+                        if (i == str.length() - 1) {
+                            list.add(number);
+                        }
+                    } else {
+                        list.add(number);
+                        number = "";
+                        list.add(str.charAt(i) + "");
+                    }
+                }
+
+                String result = recursion2(recursion1(list)).get(0);
+
+                if (result.length() >= 17) {
+                    result = result.substring(0, 17);
+                }
+
+                if (result.split("\\.")[1].equals("0")) {
+                    screen.setText(result.split("\\.")[0]);
+                } else {
+                    screen.setText(result);
+                }
             }
         });
     }
