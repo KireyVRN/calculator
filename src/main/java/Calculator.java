@@ -7,7 +7,7 @@ class Calculator extends JFrame {
 
         setLocation(600, 300);
         setSize(500, 600);
-        setTitle("C A L C U L A T O R");
+        setTitle("THE   BEST   CALCULATOR");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         ButtonPanel bp = new ButtonPanel();
         add(bp.screen, BorderLayout.NORTH);
