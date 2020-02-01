@@ -146,7 +146,7 @@ class ButtonPanel extends JPanel {
             String str = screen.getText();
             int count = 0;
             boolean lastSymbol = false;
-            
+
             for (int a = 0; a < str.length(); a++) {
                 if (str.charAt(a) == MINUS || str.charAt(a) == PLUS || str.charAt(a) == DIV || str.charAt(a) == MLTP) {
                     count++;
@@ -157,6 +157,7 @@ class ButtonPanel extends JPanel {
             }
 
             if (count == 0 || (count == 1 && lastSymbol)) {
+                //todo: WTF is this empty block ???
             } else {
                 String number = "";
                 ArrayList<String> list = new ArrayList<>();
@@ -173,7 +174,8 @@ class ButtonPanel extends JPanel {
                     }
                 }
 
-                String result = recursion2(recursion1(list)).get(0);
+                String result =
+                        calculateSequence(calculateSequence(list,"*","/"),"+","-").get(0);
 
                 if (result.length() >= 17) {
                     result = result.substring(0, 17);
@@ -196,50 +198,37 @@ class ButtonPanel extends JPanel {
         }
     }
 
-    private ArrayList<String> recursion1(ArrayList<String> list1) {
-        if (!list1.contains("*") && !list1.contains("/")) {
-            return list1;
-        } else {
-            for (int i = 0; i < list1.size(); i++) {
-                if (list1.get(i).equals("*") || list1.get(i).equals("/")) {
-                    String symb = list1.get(i);
-                    double num2 = Double.parseDouble(list1.get(i + 1));
-                    double num1 = Double.parseDouble(list1.get(i - 1));
-                    list1.remove(i + 1);
-                    list1.remove(i);
-                    if (symb.equals("/")) {
-                        list1.set(i - 1, (num1 / num2) + "");
-                    } else {
-                        list1.set(i - 1, (num1 * num2) + "");
-                    }
-                    i = 0;
-                }
-            }
-        }
-        return recursion1(list1);
-    }
+    private ArrayList<String> calculateSequence(ArrayList<String> sequence, String sym1, String sym2) {
+        if (!sequence.contains(sym1) && !sequence.contains(sym2))
+            return sequence;
 
-    private ArrayList<String> recursion2(ArrayList<String> list2) {
-        if (list2.size() == 1) {
-            return list2;
-        } else {
-            for (int i = 0; i < list2.size(); i++) {
-                if (list2.get(i).equals("+") || list2.get(i).equals("-")) {
-                    String symb = list2.get(i);
-                    double num2 = Double.parseDouble(list2.get(i + 1));
-                    double num1 = Double.parseDouble(list2.get(i - 1));
-                    list2.remove(i + 1);
-                    list2.remove(i);
-                    if (symb.equals("+")) {
-                        list2.set(i - 1, (num1 + num2) + "");
-                    } else {
-                        list2.set(i - 1, (num1 - num2) + "");
-                    }
-                    i = 0;
+        for (int i = 0; i < sequence.size(); i++) {
+            if (sequence.get(i).equals(sym1) || sequence.get(i).equals(sym2)) {
+                String sym = sequence.get(i);
+                double num2 = Double.parseDouble(sequence.get(i + 1));
+                double num1 = Double.parseDouble(sequence.get(i - 1));
+                sequence.remove(i + 1);
+                sequence.remove(i);
+
+                switch (sym) {
+                    case ("*"):
+                        sequence.set(i - 1, (num1 * num2) + "");
+                        break;
+                    case ("/"):
+                        sequence.set(i - 1, (num1 / num2) + "");
+                        break;
+                    case ("+"):
+                        sequence.set(i - 1, (num1 + num2) + "");
+                        break;
+                    default:
+                        sequence.set(i - 1, (num1 - num2) + "");
+                        break;
                 }
+                i = 0;
             }
         }
-        return recursion2(list2);
+        return calculateSequence(sequence, sym1, sym2);
+
     }
 
     private void initSettings() {
