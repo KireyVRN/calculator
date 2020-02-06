@@ -1,11 +1,10 @@
+import org.apache.commons.lang3.math.NumberUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 class ButtonPanel extends JPanel {
 
@@ -15,20 +14,15 @@ class ButtonPanel extends JPanel {
     private static final char MLTP = '*';
     private static final char DIV = '/';
     static JTextField screen;
-    private static ArrayList<JButton> buttonList = new ArrayList<>();
-
 
     enum Symbols {
-        CLEAR("C", getClearListener()),
-        REMOVE("«", getRemoveListener()),
-        INVOLUTE("x²", getInvoluteListener()),
-        SQUARE("√", getSquareListener()),
-        DOT(".", getDotListener()),
-        MULT("*", getMultiListener()),
-        DIVISION("/", getDivisionListener()),
-        PLUS("+", getPlusListener()),
-        MINUS("-", getMinusLIstener()),
-        EQUALS("=", getEqualsListener());
+        CLEAR("C", getClearListener()), ONE("1", getNumeralListener("1")), TWO("2", getNumeralListener("2")),
+        MULT("*", getMultiListener()), REMOVE("«", getRemoveListener()), THREE("3", getNumeralListener("3")),
+        FOUR("4", getNumeralListener("4")), DIVISION("/", getDivisionListener()), INVOLUTE("x²", getInvoluteListener()),
+        FIVE("5", getNumeralListener("5")), SIX("6", getNumeralListener("6")), PLUS("+", getPlusListener()),
+        SQUARE("√", getSquareListener()), SEVEN("7", getNumeralListener("7")), EIGHT("8", getNumeralListener("8")),
+        MINUS("-", getMinusLIstener()), DOT(".", getDotListener()), NINE("9", getNumeralListener("9")),
+        ZERO("0", getNumeralListener("0")), EQUALS("=", getEqualsListener());
 
         private String name;
         private ActionListener listener;
@@ -40,17 +34,8 @@ class ButtonPanel extends JPanel {
     }
 
     ButtonPanel() {
-        buttonList = (ArrayList<JButton>)
-                Stream.iterate(new JButton(), i -> new JButton()).limit(20).collect(Collectors.toList());
         initViewSettings();
-
-        initNumeralButtons(0, 5, 1);
-        initNumeralButtons(5, 10, 2);
-
-        initSymbolButtons(0, 5, 0);
-        initSymbolButtons(5, 10, 3);
-
-        buttonList.forEach(this::add);
+        initButtons(Symbols.values());
     }
 
     private static ActionListener getClearListener() {
@@ -208,36 +193,15 @@ class ButtonPanel extends JPanel {
         };
     }
 
-    private void initSymbolButtons(int from, int to, int column) {
-        List<JButton> buttons = Arrays.stream(Arrays.copyOfRange(Symbols.values(), from, to))
-                .map(s -> {
-                    JButton button = new JButton(s.name);
-                    button.setBackground(Color.orange);
-                    button.addActionListener(s.listener);
-                    return button;
-                }).collect(Collectors.toList());
-
-        addToContainer(column, buttons);
-    }
-
-    private void initNumeralButtons(int from, int to, int position) {
-        List<JButton> buttons = new ArrayList<>();
-        for (int i = from; i < to; i++) {
-            JButton button = new JButton(String.valueOf(i));
-            button.addActionListener(getNumeralListener(button.getText()));
-            buttons.add(button);
-        }
-        addToContainer(position, buttons);
-    }
-
-    private void addToContainer(int startNumber, List<JButton> buttons) {
-        Stream
-                .iterate(startNumber, i -> i + 4)
-                .limit(buttons.size())
-                .forEach(n -> {
-                    buttonList.set(n, buttons.get(0));
-                    buttons.remove(0).getText();
-                });
+    private void initButtons(Symbols[] buttons){
+        Arrays.stream(buttons).forEach(b->{
+            JButton button = new JButton(b.name);
+            if(!NumberUtils.isCreatable(b.name)){
+                button.setBackground(Color.orange);
+            }
+            button.addActionListener(b.listener);
+            add(button);
+        });
     }
 
     private static ArrayList<String> calculateSequence(ArrayList<String> sequence, String sym1, String sym2) {
@@ -280,7 +244,7 @@ class ButtonPanel extends JPanel {
         setLayout(new GridLayout(5, 4));
     }
 
-    private ActionListener getNumeralListener(String text) {
+    private static ActionListener getNumeralListener(String text) {
         return e -> {
             if (!screen.getText().equals("0"))
                 screen.setText(screen.getText() + text);
