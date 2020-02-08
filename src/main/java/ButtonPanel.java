@@ -9,20 +9,22 @@ import java.util.Arrays;
 class ButtonPanel extends JPanel {
 
     private static final int SCREEN_LIMIT = 17;
-    private static final char MINUS = '-';
-    private static final char PLUS = '+';
-    private static final char MLTP = '*';
-    private static final char DIV = '/';
+    private static final char MINUS_CH = '-';
+    private static final char PLUS_CH = '+';
+    private static final char MULT_CH = '*';
+    private static final char DIV_CH = '/';
     static JTextField screen;
 
     enum Symbols {
         CLEAR("C", getClearListener()), ONE("1", getNumeralListener("1")), TWO("2", getNumeralListener("2")),
-        MULT("*", getMultiListener()), REMOVE("«", getRemoveListener()), THREE("3", getNumeralListener("3")),
-        FOUR("4", getNumeralListener("4")), DIVISION("/", getDivisionListener()), INVOLUTE("x²", getInvoluteListener()),
-        FIVE("5", getNumeralListener("5")), SIX("6", getNumeralListener("6")), PLUS("+", getPlusListener()),
-        SQUARE("√", getSquareListener()), SEVEN("7", getNumeralListener("7")), EIGHT("8", getNumeralListener("8")),
-        MINUS("-", getMinusLIstener()), DOT(".", getDotListener()), NINE("9", getNumeralListener("9")),
-        ZERO("0", getNumeralListener("0")), EQUALS("=", getEqualsListener());
+        MULT("*", getUniversalListener(MULT_CH, MINUS_CH, PLUS_CH, DIV_CH)), REMOVE("«", getRemoveListener()),
+        THREE("3", getNumeralListener("3")), FOUR("4", getNumeralListener("4")),
+        DIVISION("/", getUniversalListener(DIV_CH, MINUS_CH, PLUS_CH, MULT_CH)), INVOLUTE("x²", getInvoluteListener()),
+        FIVE("5", getNumeralListener("5")), SIX("6", getNumeralListener("6")),
+        PLUS("+", getUniversalListener(PLUS_CH, MINUS_CH, DIV_CH, MULT_CH)), SQUARE("√", getSquareListener()),
+        SEVEN("7", getNumeralListener("7")), EIGHT("8", getNumeralListener("8")),
+        MINUS("-", getUniversalListener(MINUS_CH, MULT_CH, PLUS_CH, DIV_CH)), DOT(".", getDotListener()),
+        NINE("9", getNumeralListener("9")), ZERO("0", getNumeralListener("0")), EQUALS("=", getEqualsListener());
 
         private String name;
         private ActionListener listener;
@@ -84,61 +86,16 @@ class ButtonPanel extends JPanel {
         };
     }
 
-    private static ActionListener getMultiListener() {
+    private static ActionListener getUniversalListener(char operation, char... symbol) {
         return e -> {
             String text = screen.getText();
             if (!text.isEmpty()) {
                 char xh = text.charAt(text.length() - 1);
-                if (xh == MINUS || xh == PLUS || xh == DIV) {
+                if (xh == symbol[0] || xh == symbol[1] || xh == symbol[2]) {
                     text = text.substring(0, text.length() - 1);
                 }
-                if (xh != MLTP) {
-                    screen.setText(text + MLTP);
-                }
-            }
-        };
-    }
-
-    private static ActionListener getDivisionListener() {
-        return e -> {
-            String text = screen.getText();
-            if (!text.isEmpty()) {
-                char xh = text.charAt(text.length() - 1);
-                if (xh == MINUS || xh == MLTP || xh == PLUS) {
-                    text = text.substring(0, text.length() - 1);
-                }
-                if (xh != DIV) {
-                    screen.setText(text + DIV);
-                }
-            }
-        };
-    }
-
-    private static ActionListener getPlusListener() {
-        return e -> {
-            String text = screen.getText();
-            if (!text.isEmpty()) {
-                char xh = text.charAt(text.length() - 1);
-                if (xh == MINUS || xh == MLTP || xh == DIV) {
-                    text = text.substring(0, text.length() - 1);
-                }
-                if (xh != PLUS) {
-                    screen.setText(text + PLUS);
-                }
-            }
-        };
-    }
-
-    private static ActionListener getMinusLIstener() {
-        return e -> {
-            String text = screen.getText();
-            if (!text.isEmpty()) {
-                char xh = text.charAt(text.length() - 1);
-                if (xh == PLUS || xh == MLTP || xh == DIV) {
-                    text = text.substring(0, text.length() - 1);
-                }
-                if (xh != MINUS) {
-                    screen.setText(text + MINUS);
+                if (xh != operation) {
+                    screen.setText(text + operation);
                 }
             }
         };
@@ -151,7 +108,7 @@ class ButtonPanel extends JPanel {
             boolean lastSymbol = false;
 
             for (int a = 0; a < str.length(); a++) {
-                if (str.charAt(a) == MINUS || str.charAt(a) == PLUS || str.charAt(a) == DIV || str.charAt(a) == MLTP) {
+                if (str.charAt(a) == MINUS_CH || str.charAt(a) == PLUS_CH || str.charAt(a) == DIV_CH || str.charAt(a) == MULT_CH) {
                     count++;
                     if (a == str.length() - 1) {
                         lastSymbol = true;
@@ -159,13 +116,11 @@ class ButtonPanel extends JPanel {
                 }
             }
 
-            if (count == 0 || (count == 1 && lastSymbol)) {
-                //todo: WTF is this empty block ???
-            } else {
+            if (count != 0 && !(count == 1 && lastSymbol)) {
                 String number = "";
                 ArrayList<String> list = new ArrayList<>();
                 for (int i = 0; i < str.length(); i++) {
-                    if (str.charAt(i) != MLTP && str.charAt(i) != MINUS && str.charAt(i) != DIV && str.charAt(i) != PLUS) {
+                    if (str.charAt(i) != MULT_CH && str.charAt(i) != MINUS_CH && str.charAt(i) != DIV_CH && str.charAt(i) != PLUS_CH) {
                         number += str.charAt(i);
                         if (i == str.length() - 1) {
                             list.add(number);
@@ -180,23 +135,21 @@ class ButtonPanel extends JPanel {
                 String result =
                         calculateSequence(calculateSequence(list, "*", "/"), "+", "-").get(0);
 
-                if (result.length() >= SCREEN_LIMIT) {
+                if (result.length() >= SCREEN_LIMIT)
                     result = result.substring(0, SCREEN_LIMIT);
-                }
 
-                if (result.split("\\.")[1].equals("0")) {
+                if (result.split("\\.")[1].equals("0"))
                     screen.setText(result.split("\\.")[0]);
-                } else {
+                else
                     screen.setText(result);
-                }
             }
         };
     }
 
-    private void initButtons(Symbols[] buttons){
-        Arrays.stream(buttons).forEach(b->{
+    private void initButtons(Symbols[] buttons) {
+        Arrays.stream(buttons).forEach(b -> {
             JButton button = new JButton(b.name);
-            if(!NumberUtils.isCreatable(b.name)){
+            if (!NumberUtils.isCreatable(b.name)) {
                 button.setBackground(Color.orange);
             }
             button.addActionListener(b.listener);
@@ -250,7 +203,6 @@ class ButtonPanel extends JPanel {
                 screen.setText(screen.getText() + text);
             else
                 screen.setText(text);
-
         };
     }
 }
