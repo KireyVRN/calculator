@@ -14,6 +14,5 @@ class Calculator extends JFrame {
         add(bp, BorderLayout.CENTER);
         setVisible(true);
 
-
     }
 }
